@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import './commonStyles/style.scss';
+
+.modal-wrapper {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.438);
+    top: 0;
+    display: flex;
+    opacity: 0;
+    visibility: hidden;
+    transition: ease-in-out 0.2s;
+    .modal-container {
+        width: 100%;
+        max-width: 500px;
+        padding: 25px;
+        background-color: #fff;
+        margin: auto;
+        position: relative;
+        .close-modal-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: transparent;
+        }
+    }
+}
+
+.app-btn {
+    padding: 0;
+    margin: 0;
+    border: none;
+    span.material-icons {
+        pointer-events: none;
+    }
+}
+
+.open-create-btn {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+}
