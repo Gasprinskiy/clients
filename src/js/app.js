@@ -4,15 +4,21 @@ import { storage } from './core/storage.js'
 import { renderer } from './core/renderer.js'
 import { toggle } from './core/toggle.js';
 import { toggleWithTimeOut, returnFirstChild } from './helpers/myHelpers.js';
-import { mount, mountDefaultModal, mountCLientList } from './app/mounter.js';
+import { mount, mountDefaultModal, mountCLientList } from './mounter/mounter.js';
 import { methodCaller } from './core/methodCaller.js'
-import { clientList, listInner } from './components/clientList.js';
+import { listInner } from './components/clientList.js';
 import { redactBtns , paymetRedactor } from './components/clientForm.js'
 import { data } from './core/dataFilterer.js';
+import { db } from './db/fakeDb.js';
 import validator from 'validator';
 
 
 const packs = client.createPacksArray();
+const searchTypes = [
+    {value: 'name', title: 'Имeни'},
+    {value: 'surname', title: 'Фамилии'},
+    {value: 'phone', title: 'Номеру телефона'},
+]
 const listKey = 'Client-List'
 let clientsDb = [];
 let userList = [];
@@ -28,21 +34,30 @@ let userInfo = {
 }
 let searchData = {
     searchQuerry: '',
+    searchBy: {
+        value: '',
+        title: ''
+    },
     filterPack: {
         value: '',
         title: ''
-    }
+    },
 }
 const loadOptions = {
     page: 1,
     limit: 10,
     isInSearch: false
 }
-let oldVal = ''
-const defaultUserInfo = JSON.stringify(userInfo)
+
+const defaultData = {
+   userInfo: JSON.stringify(userInfo),
+   searchData: JSON.stringify(searchData),
+   clientOldVal: ''
+} 
 
 
 window.addEventListener('DOMContentLoaded', ()=> {
+    // methods.initiateDb()// To see how app works recoment this line or
     clientsDb = storage.get({key: listKey, defaultVal: clientsDb})
     userList = data.separate({sourceArray: clientsDb, options: loadOptions})
     mount({
@@ -50,11 +65,20 @@ window.addEventListener('DOMContentLoaded', ()=> {
         db: clientsDb,
         modalData: userInfo,
         searchData: searchData,
-        options: packs
+        options: {
+            packs: packs,
+            searchType: searchTypes
+        }
     })
     .then(()=>{
-        methodCaller.call({methods: methods})
         searchData = updater.updateData({selectors: '.input[data-searchkey]', data: searchData})
+        methodCaller.call({methods: methods})
+        if(userList.length <= 0){
+            renderer.render({
+                selector:'.client-list', 
+                template: '<span class="no-result">Список клиентов пуст</span>', 
+            })
+        }
     })  
 })
 
@@ -69,7 +93,7 @@ const methods = {
 
     openRedactModal(target){
        const client = userList.find(list => list.id === target.dataset.client);
-       oldVal = JSON.stringify(client)
+       defaultData.clientOldVal = JSON.stringify(client)
        userInfo = updater.updateSelector({selectors:'.input[data-key]', data: client})
        userInfo = updater.updateData({selectors: '.input[data-key]', data: userInfo})
        renderer.render({selector: '.form-btns', template: redactBtns(client.id)})
@@ -82,7 +106,6 @@ const methods = {
         if(this.validateForm(userInfo) === true){
             const newUser = client.create(userInfo)
             renderer.render({selector: '.form-error', template: ''})
-            methodCaller.call({methods: methods, parrent: '.client-list'})
             clientsDb.unshift(newUser)
             this.setData()
                 .then(()=> {
@@ -91,6 +114,7 @@ const methods = {
                         .then(()=> {
                             mountCLientList(userList, clientsDb)
                             toggleWithTimeOut(returnFirstChild('.client-list'), 'accent', 500)
+                            methodCaller.call({methods: methods, parrent: '.client-list'})
                         })
                 })
         } else {
@@ -107,19 +131,22 @@ const methods = {
             searchBy: {val: 'client', id: cleintId}
         })
         clientsDb = client.remove({id: cleintId, list: clientsDb});
-        this.setData()
-            .then(()=>{
-                this.getData()
-                    .then(()=>{
-                        renderer.remove(removedElem)
-                        mountCLientList(userList, clientsDb)
-                        methodCaller.call({methods: methods, parrent: '.client-list'})
-                    })
-            })
+        toggleWithTimeOut(removedElem, 'removed', 500)
+        setTimeout(()=>{
+            this.setData()
+                .then(()=>{
+                    this.getData()
+                        .then(()=>{
+                            renderer.remove(removedElem)
+                            mountCLientList(userList, clientsDb)
+                            methodCaller.call({methods: methods, parrent: '.client-list'})
+                        })
+                }) 
+        }, 700)
     },
 
     editUser(target){
-        if(oldVal === JSON.stringify(userInfo)) {
+        if(defaultData.clientOldVal === JSON.stringify(userInfo)) {
             renderer.render({selector: '.form-error', template: 'Вы ничего не меняли'})
         } else {
             renderer.render({selector: '.form-error', template: ''})
@@ -180,22 +207,69 @@ const methods = {
     },
 
     searchClient(){
-        searchResults = data.search({
-            sourceArray: clientsDb, 
-            searchOptions: {
-                querry: searchData.searchQuerry,
-                packFilter: searchData.filterPack.title
+        if(defaultData.searchData === JSON.stringify(searchData)){
+            renderer.render({selector: '.search-bar-error', template: 'Поля поискового запроса пусты'})
+            if(loadOptions.isInSearch){
+                renderer.render({selector: '.search-bar-error', template: ''})
+                loadOptions.page = 1
+                this.getData()
+                    .then(()=>{
+                        mountCLientList(userList, clientsDb)
+                        loadOptions.isInSearch = false
+                        methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
+                    })
             }
-        });
-        userList = data.separate({sourceArray: searchResults, options: loadOptions})
-        loadOptions.isInSearch = true
-        if(userList.length <= 0){
-            renderer.render({
-                selector:'.client-list', 
-                template: '<span>Поиск не вернул результат</span>', 
-            })
+            
         } else {
-            mountCLientList(userList, clientsDb)
+            renderer.render({selector: '.search-bar-error', template: ''})
+            const defaultSearch = JSON.parse(defaultData.searchData)
+            let searchParams = []
+            Object.keys(searchData).forEach(key => {
+                if(JSON.stringify(searchData[key]) !== JSON.stringify(defaultSearch[key])) {
+                    searchParams.push(key)
+                } else {
+                    searchParams = searchParams.filter(p => p !== key)
+                }
+            })
+            const includesQuerry = searchParams.includes('searchQuerry');
+            const includesSearchBy = searchParams.includes('searchBy');
+            const includesPack = searchParams.includes('filterPack')
+            let searchMethod = ''
+            if((includesQuerry && !includesSearchBy) && (includesPack || !includesPack)) {
+                renderer.render({selector: '.search-bar-error', template: 'Выберите по каким параметрам делать поиск'})
+                searchMethod = ''
+            } else if((includesSearchBy && !includesQuerry) && (includesPack || !includesPack)) {
+                renderer.render({selector: '.search-bar-error', template: 'Строка поиска пуста'})
+                searchMethod = ''
+            } else if(includesSearchBy && includesQuerry && !includesPack) {
+                searchMethod = 'byQuerry'
+            } else if(!includesSearchBy && !includesQuerry && includesPack) {
+                searchMethod = 'byPack'
+            } else if(includesSearchBy && includesQuerry && includesPack) {
+                searchMethod = 'full'
+            }
+            if(searchMethod.length > 0) {
+                renderer.render({selector: '.search-bar-error', template: ''})
+                searchResults = data.search({
+                    sourceArray: clientsDb, 
+                    method: searchMethod,
+                    options: searchData
+                })
+                userList = data.separate({sourceArray: searchResults, options: loadOptions})
+                loadOptions.isInSearch = true
+                if(userList.length <= 0){
+                    mountCLientList(userList, searchResults)
+                    renderer.render({
+                        selector:'.client-list', 
+                        template: '<span class="no-result">Поиск не вернул результат</span>', 
+                    })
+                } else {
+                    mountCLientList(userList, searchResults)
+                    methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
+                    searchData = updater.updateData({selectors: '.input[data-searchkey]', data: searchData})
+                } 
+            }
+                   
         }
     },
 
@@ -207,7 +281,7 @@ const methods = {
             userList = data.separate({sourceArray: clientsDb, options: loadOptions})
         }
         mountCLientList(userList, clientsDb)
-        methodCaller.call({methods: methods, parrent: '.client-list'})
+        methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
     },
 
     openModal(){
@@ -216,7 +290,8 @@ const methods = {
 
     closeModal(){
         toggle.visibility({state: 'hide', target:'.modal-wrapper', toggleClass: 'show'})
-        userInfo = JSON.parse(defaultUserInfo)
+        userInfo = JSON.parse(defaultData.userInfo)
+        renderer.render({selector: '.form-error', template: ''})
     },
 
     async setData(){
@@ -248,6 +323,10 @@ const methods = {
         }
         newArr.unshift (val)  
         return newArr
+    },
+
+    initiateDb(){
+        storage.set({key: listKey, value: db})
     }
 }
 
