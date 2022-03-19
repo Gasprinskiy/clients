@@ -1,5 +1,190 @@
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 @import './commonStyles/style.scss';
+@import './commonStyles/variables.scss';
+
+
+*[class].show {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+.error {
+    display: block;
+    color: $negativ;
+    height: 20px;
+    text-align: center;
+    font-size: 16px;
+    padding: 5px 0px;
+}
+
+
+
+.app-btn {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    background-color: $primary;
+    color: #fff;
+    line-height: 24px;
+    &.close-modal-btn {
+        color: #000;
+    }
+    &.negative {
+        background-color: $negativ;
+    }
+}
+
+.open-create-btn {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+}
+
+.form-input {
+    display: flex;
+    flex-direction: column;
+    input,
+    select {
+        border-radius: 5px;
+        outline: 1px solid $dark;
+        padding: 5px;
+        background-color: #fff;
+        &:focus {
+            outline-color: $primary;
+        }
+    }
+}
+
+
+//===================================================================
+
+.content {
+    width: 100%;
+    max-width: 1440px;
+    padding: 0px 50px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 40px;
+}
+
+.search-bar-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 0px;
+    .search-bar {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        .form-input {
+            margin-bottom: 15px;
+            button {
+                margin-left: auto;
+            }
+        }
+    }
+}
+
+.client-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .client-list-heading {
+        margin-bottom: 20px;
+        font-weight: 600;
+        font-size: 32px;
+    }
+    .client-list {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, 49%);
+        gap: 15px;
+        cursor: pointer;
+        margin-bottom: 35px;
+        position: relative;
+        .no-result {
+            display: block;
+            width: 100%;
+            text-align: center;
+            position: absolute;
+            font-size: 20px;
+            color: $negativ;
+        }
+        .client {
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #fff;
+            transition: ease-in-out 0.2s;
+            &:hover {
+                outline: 1px solid $primary;
+            }
+            &.accent {
+                background-color: $accent;
+                color: #fff;
+                transition: ease-in-out 0.2s;
+                .client-inner {
+                    .avatar-icon {
+                        color: #fff;
+                        transition: ease-in-out 0.2s;
+                    }
+                    p {
+                        color: #fff;
+                        transition: ease-in-out 0.2s;
+                    }
+                }
+                
+            }
+            &.removed {
+                background-color: $negativ;
+                color: #fff;
+                transition: ease-in-out 0.2s;
+                .client-inner {
+                    .avatar-icon {
+                        color: #fff;
+                        transition: ease-in-out 0.2s;
+                    }
+                    p {
+                        color: #fff;
+                        transition: ease-in-out 0.2s;
+                    }
+                }
+            }
+            .client-inner {
+                display: flex;
+                align-items: center;
+                pointer-events: none;
+                .avatar-icon {
+                    transition: ease-in-out 0.2s;
+                    font-size: 40px;
+                    color: $primary;
+                    margin-right: 15px;
+                }
+                p {
+                    transition: ease-in-out 0.2s;
+                }
+                .user-name {
+                    font-weight: 500;
+                    color: $accent;
+                    margin-bottom: 8px;
+                    font-size: 18px;
+                }
+                .user-pack {
+                    color: $postitve;
+                    margin-bottom: 5px;
+                }
+                .user-payment {
+                    color: $info;
+                }
+            }
+        }
+    }
+}
+
 
 .modal-wrapper {
     width: 100%;
@@ -7,6 +192,7 @@
     position: fixed;
     background-color: rgba(0, 0, 0, 0.438);
     top: 0;
+    left: 0;
     display: flex;
     opacity: 0;
     visibility: hidden;
@@ -18,6 +204,7 @@
         background-color: #fff;
         margin: auto;
         position: relative;
+        border-radius: 5px;
         .close-modal-btn {
             position: absolute;
             top: 5px;
@@ -26,18 +213,30 @@
         }
     }
 }
-
-.app-btn {
-    padding: 0;
-    margin: 0;
-    border: none;
-    span.material-icons {
-        pointer-events: none;
+.client-form-column {
+    .form-btns {
+        display: flex;
+        justify-content: space-around;
     }
-}
-
-.open-create-btn {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
+    .from-additional-info {
+        padding: 20px 0px;
+    }
+    .payment-btns {
+        margin: 10px 0px;
+        margin-right: auto;
+        button {
+            padding: 2px 8px;
+            border-radius: 5px;
+            color: #fff;
+            &.prepayment-btn {
+                background-color: $half;
+            }
+            &.full-payment-btn {
+                background-color: $postitve;
+            }
+        }
+    }
+    .form-input {
+        margin-bottom: 10px;
+    }
 }
