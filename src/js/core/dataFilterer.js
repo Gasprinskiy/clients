@@ -3,27 +3,18 @@ class DataFilterer {
         return sourceArray.slice(0 , options.limit * options.page)
     }
 
-    search({sourceArray, searchOptions}){
-        let resultArray = []
-        resultArray.push(this.commonSearch(sourceArray, searchOptions.querry))
-        if(searchOptions.packFilter.length > 0){
-            resultArray = resultArray.filter(item => item.pack.title === searchOptions.packFilter)
+    search({sourceArray, method, options}){
+        switch (method) {
+            case 'byQuerry': return sourceArray.filter(item => item[options.searchBy.value] === options.searchQuerry)
+            case 'byPack' : return sourceArray.filter(item => item.pack.value === options.filterPack.value)
+            case 'full': 
+            return sourceArray
+            .filter(item => item[options.searchBy.value] === options.searchQuerry)
+            .filter(item => item.pack.value === options.filterPack.value)
         }
-        return resultArray
     }
 
-    commonSearch(sourceArray, querry) {
-       let foundItem = {}
-       sourceArray.map(item => {
-            Object.keys(item).forEach(key => {
-                const values = JSON.stringify(item[key]).toLowerCase()
-                if(values.includes(querry.toLowerCase())){
-                    foundItem = item
-                }
-            })
-       })
-       return foundItem
-    }
+    
 }
 
 export const data = new DataFilterer()
