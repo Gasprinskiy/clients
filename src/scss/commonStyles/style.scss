@@ -5,20 +5,7 @@
   box-sizing: border-box;
   
 }
-*[class].show {
-    opacity: 1;
-    visibility: visible;
-}
 
-li[data-method] {
-  transition: ease-in-out 0.2s;
-}
-
-li.accent {
-  background-color: red;
-  color: white;
-  transition: ease-in-out 0.2s;
-}
 
 ul[class],
 ol[class] {
@@ -46,8 +33,9 @@ body {
   min-height: 100vh;
   scroll-behavior: smooth;
   text-rendering: optimizeSpeed;
-  line-height: 1.5;
   font-family: 'Inter', sans-serif;
+  background-color: #F9FAFB;
+  color: #101828;
 }
 
 ul[class],
@@ -73,11 +61,25 @@ button,
 textarea,
 select {
   font: inherit;
+  background-color: inherit;
+  border: none;
+  outline: none;
+  &:focus {
+    border: none;
+    outline: none;
+  }
 }
 
 button {
   cursor: pointer;
+  margin: 0;
+  padding: 0;
 }
+
+span.material-icons {
+  pointer-events: none;
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   * {
