@@ -311,7 +311,7 @@ const methods = {
         if(!isNameValid && !isSurnameValid && isPhoneValid && !isSelectValid){
             return true
         } else {
-            return 'Поля заполнены не верно'
+            return 'Заполните все поля!'
         }
     },
 
