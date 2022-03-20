@@ -231,28 +231,15 @@ const methods = {
                     searchParams = searchParams.filter(p => p !== key)
                 }
             })
-            const includesQuerry = searchParams.includes('searchQuerry');
-            const includesSearchBy = searchParams.includes('searchBy');
-            const includesPack = searchParams.includes('filterPack')
-            let searchMethod = ''
-            if((includesQuerry && !includesSearchBy) && (includesPack || !includesPack)) {
-                renderer.render({selector: '.search-bar-error', template: 'Выберите по каким параметрам делать поиск'})
-                searchMethod = ''
-            } else if((includesSearchBy && !includesQuerry) && (includesPack || !includesPack)) {
-                renderer.render({selector: '.search-bar-error', template: 'Строка поиска пуста'})
-                searchMethod = ''
-            } else if(includesSearchBy && includesQuerry && !includesPack) {
-                searchMethod = 'byQuerry'
-            } else if(!includesSearchBy && !includesQuerry && includesPack) {
-                searchMethod = 'byPack'
-            } else if(includesSearchBy && includesQuerry && includesPack) {
-                searchMethod = 'full'
-            }
-            if(searchMethod.length > 0) {
+            const searchValidate = this.validateSearch(searchParams)
+
+            if(searchValidate.err){
+                renderer.render({selector: '.search-bar-error', template: searchValidate.errMsg})
+            } else {
                 renderer.render({selector: '.search-bar-error', template: ''})
                 searchResults = data.search({
                     sourceArray: clientsDb, 
-                    method: searchMethod,
+                    method: searchValidate.method,
                     options: searchData
                 })
                 userList = data.separate({sourceArray: searchResults, options: loadOptions})
@@ -311,8 +298,37 @@ const methods = {
         if(!isNameValid && !isSurnameValid && isPhoneValid && !isSelectValid){
             return true
         } else {
-            return 'Заполните все поля!'
+            return 'Заполните все поля'
         }
+    },
+
+    validateSearch(params){
+        const includesQuerry = params.includes('searchQuerry');
+        const includesSearchBy = params.includes('searchBy');
+        const includesPack = params.includes('filterPack')
+        let searchMethod = ''
+        let searchError = ''
+            if((includesQuerry && !includesSearchBy) && (includesPack || !includesPack)) {
+                searchError = 'Выберите по каким параметрам делать поиск'
+                searchMethod = ''
+            } else if((includesSearchBy && !includesQuerry) && (includesPack || !includesPack)) {
+                searchError = 'Строка поиска пуста'
+                searchMethod = ''
+            } else if(includesSearchBy && includesQuerry && !includesPack) {
+                searchError = ''
+                searchMethod = 'byQuerry'
+            } else if(!includesSearchBy && !includesQuerry && includesPack) {
+                searchError = ''
+                searchMethod = 'byPack'
+            } else if(includesSearchBy && includesQuerry && includesPack) {
+                searchError = ''
+                searchMethod = 'full'
+            }
+        return {
+            err: searchError !== '',
+            errMsg: searchError,
+            method: searchMethod
+        }    
     },
 
     definePush(array, val){
