@@ -57,7 +57,7 @@ const defaultData = {
 
 
 window.addEventListener('DOMContentLoaded', ()=> {
-    // methods.initiateDb()// To see how app works recoment this line or
+    // methods.initiateDb()// To see how app works recoment this line
     clientsDb = storage.get({key: listKey, defaultVal: clientsDb})
     userList = data.separate({sourceArray: clientsDb, options: loadOptions})
     mount({
@@ -114,7 +114,7 @@ const methods = {
                         .then(()=> {
                             mountCLientList(userList, clientsDb)
                             toggleWithTimeOut(returnFirstChild('.client-list'), 'accent', 500)
-                            methodCaller.call({methods: methods, parrent: '.client-list'})
+                            methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
                         })
                 })
         } else {
@@ -139,7 +139,7 @@ const methods = {
                         .then(()=>{
                             renderer.remove(removedElem)
                             mountCLientList(userList, clientsDb)
-                            methodCaller.call({methods: methods, parrent: '.client-list'})
+                            methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
                         })
                 }) 
         }, 700)
