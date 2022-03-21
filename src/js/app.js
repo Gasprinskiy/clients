@@ -112,7 +112,7 @@ const methods = {
                     this.closeModal()
                     this.getData()
                         .then(()=> {
-                            mountCLientList(userList, clientsDb)
+                            this.updateClientList()
                             toggleWithTimeOut(returnFirstChild('.client-list'), 'accent', 500)
                             methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
                         })
@@ -138,7 +138,7 @@ const methods = {
                     this.getData()
                         .then(()=>{
                             renderer.remove(removedElem)
-                            mountCLientList(userList, clientsDb)
+                            this.updateClientList()
                             methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
                         })
                 }) 
@@ -214,8 +214,8 @@ const methods = {
                 loadOptions.page = 1
                 this.getData()
                     .then(()=>{
-                        mountCLientList(userList, clientsDb)
                         loadOptions.isInSearch = false
+                        this.updateClientList()
                         methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
                     })
             }
@@ -245,13 +245,13 @@ const methods = {
                 userList = data.separate({sourceArray: searchResults, options: loadOptions})
                 loadOptions.isInSearch = true
                 if(userList.length <= 0){
-                    mountCLientList(userList, searchResults)
+                    this.updateClientList()
                     renderer.render({
                         selector:'.client-list', 
                         template: '<span class="no-result">Поиск не вернул результат</span>', 
                     })
                 } else {
-                    mountCLientList(userList, searchResults)
+                    this.updateClientList()
                     methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
                     searchData = updater.updateData({selectors: '.input[data-searchkey]', data: searchData})
                 } 
@@ -264,12 +264,19 @@ const methods = {
         loadOptions.page += 1
         if(loadOptions.isInSearch) {
             userList = data.separate({sourceArray: searchResults, options: loadOptions})
-            mountCLientList(userList, searchResults)
         } else {
             userList = data.separate({sourceArray: clientsDb, options: loadOptions})
+        }
+        this.updateClientList()
+        methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
+    },
+
+    updateClientList(){
+        if(loadOptions.isInSearch){
+            mountCLientList(userList, searchResults)
+        } else {
             mountCLientList(userList, clientsDb)
         }
-        methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
     },
 
     openModal(){
@@ -346,9 +353,3 @@ const methods = {
         storage.set({key: listKey, value: db})
     }
 }
-
-
-
-
-
-
