@@ -264,10 +264,11 @@ const methods = {
         loadOptions.page += 1
         if(loadOptions.isInSearch) {
             userList = data.separate({sourceArray: searchResults, options: loadOptions})
+            mountCLientList(userList, searchResults)
         } else {
             userList = data.separate({sourceArray: clientsDb, options: loadOptions})
+            mountCLientList(userList, clientsDb)
         }
-        mountCLientList(userList, clientsDb)
         methodCaller.call({methods: methods, parrent: '.client-list-wrapper'})
     },
 
